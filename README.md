@@ -33,15 +33,14 @@ The system is designed as a modular pipeline with clear separation between API, 
 
 ## Architecture
 
-High-level flow:
-
-
+### High-level flow:
+```
 Client → FastAPI → Service Layer → Repository Layer → PostgreSQL
 ↓
 Celery Worker
 ↓
 Ingestion + Embedding Pipeline
-
+```
 
 ### Layers
 
@@ -70,7 +69,7 @@ Ingestion + Embedding Pipeline
 
 ## Project Structure
 
-
+```
 book-recommender/
 │
 ├── app/
@@ -118,7 +117,7 @@ book-recommender/
 ├── Dockerfile
 ├── pyproject.toml
 └── README.md
-
+```
 
 ---
 
