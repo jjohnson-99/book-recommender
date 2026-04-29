@@ -1,0 +1,63 @@
+services:
+  db:
+    image: pgvector/pgvector:pg15
+    container_name: book_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: books
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+      - ./app/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./app/db/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d books"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: book_redis
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    container_name: book_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/books
+      REDIS_URL: redis://redis:6379/0
+
+  worker:
+    build: .
+    container_name: book_worker
+    command: celery -A app.worker.celery_app.celery_app worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/books
+      REDIS_URL: redis://redis:6379/0
+
+volumes:
+  postgres_data:

@@ -1,0 +1,31 @@
+[project]
+name = "book-recommender"
+version = "0.1.0"
+description = "Goodreads CSV -> RAG-based recommendation API"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "python-multipart",
+    "pydantic",
+    "celery>=5.6.3",
+    "openai>=2.32.0",
+    "sentence-transformers>=2.7.0",
+    "redis>=5.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx",
+    "black",
+    "ruff"
+]
+
+# Optional: if you want CLI entrypoint later
+[project.scripts]
+start = "app.main:app"
